@@ -1,21 +1,6 @@
-<a href="https://www.codacy.com/manual/ahmedt/rx-form-data?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=metronlabsllc/rx-form-data&amp;utm_campaign=Badge_Grade">
-  <img src="https://api.codacy.com/project/badge/Grade/18033391cf154b35839fa2a377c44370"/>
-</a>
-<a href="https://snyk.io/test/github/metronlabsllc/rx-form-data">
-  <img src="https://snyk.io/test/github/metronlabsllc/rx-form-data/badge.svg" alt="Known Vulnerabilities">
-</a>
-<a href="https://david-dm.org/metronlabsllc/rx-form-data">
-  <img src="https://david-dm.org/metronlabsllc/rx-form-data.svg" alt="Dependency Status">
-</a>
-<a href="https://david-dm.org/metronlabsllc/rx-form-data/?type=dev">
-  <img src="https://david-dm.org/metronlabsllc/rx-form-data/dev-status.svg" alt="devDependency Status">
-</a>
-
-[![gzip size](http://img.badgesize.io/https://unpkg.com/rx-form-data@latest/dist/rx-form-data.umd.js?compression=gzip)](https://unpkg.com/rx-form-data@latest/dist/rx-form-data.umd.js) [![license](https://badgen.now.sh/badge/license/MIT)](./LICENSE)
-
 # rx-form-data
 
-> Minimal, Reactive, Effectful form handling library.
+> Minimal, Reactive Form data handling
 
 - **Fully written in Typescript**
 - **Turns form into a signal of field values (user input & some metadata)**
@@ -32,8 +17,6 @@
 - [License](#license)
 
 ## Install
-
-This project uses [node](http://nodejs.org) and [npm](https://npmjs.com). Go check them out if you don't have them locally installed.
 
 ```sh
 npm install --save rx-form-data
@@ -52,7 +35,7 @@ const RxFormData = require("rx-form-data");
 The [UMD](https://github.com/umdjs/umd) build is also available on [unpkg](https://unpkg.com):
 
 ```html
-<script src="https://unpkg.com/rx-form-data/dist/rx-form-data.umd.js"></script>
+<script src="https://unpkg.com/rx-form-data/lib/umd/index.js"></script>
 ```
 
 You can find the library on `window.RxFormData`.
