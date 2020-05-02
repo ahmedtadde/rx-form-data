@@ -44,28 +44,25 @@ You can find the library on `window.RxFormData`.
 
 ```typescript
 import RxFormData from "rx-form-data";
+const { subscribe, dispatch, ACTION_TYPE } = RxFormData(
+  "some-form-id",
+  (formvalues, formdata) => {
+    console.log("ON SUBMIT HANDLER CALLED", formvalues, formdata);
+    return Promise.resolve([formvalues]);
+  }
+);
 
-window.addEventListener("load", () => {
-  const { subscribe, dispatch, ACTION_TYPE } = RxFormData(
-    "some-form-id",
-    (formvalues, formdata) => {
-      console.log("ON SUBMIT HANDLER CALLED", formvalues, formdata);
-      return Promise.resolve([formvalues]);
-    }
-  );
-
-  const unsubscribe = subscribe((formvalues) => {
-    console.debug("FORM VALUES SUBSCRIBER", formvalues);
-  });
-
-  setTimeout(() => {
-    unsubscribe();
-  }, 2 * 60 * 1000);
-
-  setTimeout(() => {
-    dispatch(ACTION_TYPE.DESTROY);
-  }, 3 * 60 * 1000);
+const unsubscribe = subscribe((formvalues) => {
+  console.debug("FORM VALUES SUBSCRIBER", formvalues);
 });
+
+setTimeout(() => {
+  unsubscribe();
+}, 2 * 60 * 1000);
+
+setTimeout(() => {
+  dispatch(ACTION_TYPE.DESTROY);
+}, 3 * 60 * 1000);
 ```
 
 ## Contribute
