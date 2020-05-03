@@ -1,4 +1,4 @@
-import { $getform, isFormFieldElement } from "@operators/dom";
+import { $getform } from "@operators/dom";
 import { isNone } from "@datatypes/Option";
 import { panic } from "@operators/error";
 import {
