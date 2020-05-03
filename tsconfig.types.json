@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ],
+    "declaration": true,
+    "declarationDir": "./lib/types/",
+    "emitDeclarationOnly": true
+  }
+}

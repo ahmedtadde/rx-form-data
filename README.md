@@ -21,23 +21,23 @@
 ## Install
 
 ```sh
-npm install --save rx-form-data
+npm install --save @metronlabs/rx-form-data
 ```
 
 Then with a module bundler like [rollup](http://rollupjs.org/) or [webpack](https://webpack.js.org/), use as you would anything else:
 
 ```javascript
 // using ES6 modules
-import RxFormData from "rx-form-data";
+import RxFormData from "@metronlabs/rx-form-data";
 
 // using CommonJS modules
-const RxFormData = require("rx-form-data");
+const RxFormData = require("@metronlabs/rx-form-data");
 ```
 
 The [UMD](https://github.com/umdjs/umd) build is also available on [unpkg](https://unpkg.com):
 
 ```html
-<script src="https://unpkg.com/rx-form-data/lib/umd/index.js"></script>
+<script src="https://unpkg.com/@metronlabs/rx-form-data/lib/index.umd.js"></script>
 ```
 
 You can find the library on `window.RxFormData`.
@@ -45,7 +45,7 @@ You can find the library on `window.RxFormData`.
 ## Usage
 
 ```typescript
-import RxFormData from "rx-form-data";
+import RxFormData from "@metronlabs/rx-form-data";
 const { subscribe, dispatch, ACTION_TYPE } = RxFormData(
   "some-form-id",
   (formvalues, formdata) => {
@@ -82,8 +82,8 @@ If don't, just open a [new clear and descriptive issue](../../issues/new).
 Pull requests are the greatest contributions, so be sure they are focused in scope, and do avoid unrelated commits.
 
 - Fork it!
-- Clone your fork: `git clone https://github.com/<your-username>/rx-form-data`
-- Navigate to the newly cloned directory: `cd rx-form-data`
+- Clone your fork: `git clone https://github.com/<your-username>/@metronlabs/rx-form-data`
+- Navigate to the newly cloned directory: `cd @metronlabs/rx-form-data`
 - Create a new branch for the new feature: `git checkout -b features/my-new-feature`
 - Install the tools necessary for development: `npm install`
 - Make your changes.
