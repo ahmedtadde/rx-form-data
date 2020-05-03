@@ -1,5 +1,7 @@
 # rx-form-data
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d148e1b923fa4a6a9094458356f97379)](https://app.codacy.com/manual/ahmedt/rx-form-data?utm_source=github.com&utm_medium=referral&utm_content=ahmedtadde/rx-form-data&utm_campaign=Badge_Grade_Dashboard)
+
 > Minimal, Reactive Form data handling
 
 - **Fully written in Typescript**
