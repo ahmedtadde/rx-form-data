@@ -1,6 +1,11 @@
 # rx-form-data
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d148e1b923fa4a6a9094458356f97379)](https://app.codacy.com/manual/ahmedt/rx-form-data?utm_source=github.com&utm_medium=referral&utm_content=ahmedtadde/rx-form-data&utm_campaign=Badge_Grade_Dashboard)
+[![Known Vulnerabilities](https://snyk.io/test/github/ahmedtadde/rx-form-data/badge.svg)](https://snyk.io/test/github/ahmedtadde/rx-form-data)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/@metronlabs/rx-form-data)
+![dependencies status](https://img.shields.io/david/ahmedtadde/rx-form-data)
+![dev dependencies status](https://img.shields.io/david/dev/ahmedtadde/rx-form-data)
+![npm](https://img.shields.io/npm/dt/@metronlabs/rx-form-data)
 
 > Minimal, Reactive Form data handling
 
@@ -75,7 +80,7 @@ Now, take a moment to be sure your contributions make sense to everyone else.
 ### Reporting Issues
 
 Found a problem? Want a new feature? First of all see if your issue or idea has [already been reported](../../issues).
-If don't, just open a [new clear and descriptive issue](../../issues/new).
+If not, just open a [new clear and descriptive issue](../../issues/new).
 
 ### Submitting pull requests
 

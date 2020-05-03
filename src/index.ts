@@ -1,4 +1,4 @@
-import { $getform } from "@operators/dom";
+import { $getform, isFormFieldElement } from "@operators/dom";
 import { isNone } from "@datatypes/Option";
 import { panic } from "@operators/error";
 import {
@@ -62,6 +62,11 @@ export default function RxFormData(
       dispatch: Object.freeze(
         (type: ProgramInterfaceActionType, payload?: unknown): void => {
           switch (type) {
+            case PROGRAM_INTERFACE_ACTION_TYPE.REGISTER_ALL: {
+              repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.REGISTER_ALL);
+              break;
+            }
+
             case PROGRAM_INTERFACE_ACTION_TYPE.REGISTER: {
               const selection = Array.isArray(payload)
                 ? payload.reduce(
@@ -85,6 +90,15 @@ export default function RxFormData(
                 );
               break;
             }
+
+            case PROGRAM_INTERFACE_ACTION_TYPE.UNREGISTER_ALL: {
+              repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER_ALL);
+              const keepvalues = payload !== false;
+              !keepvalues &&
+                repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.RESET);
+              break;
+            }
+
             case PROGRAM_INTERFACE_ACTION_TYPE.UNREGISTER: {
               const selection = Array.isArray(payload)
                 ? payload.reduce(
@@ -109,6 +123,8 @@ export default function RxFormData(
               break;
             }
             case PROGRAM_INTERFACE_ACTION_TYPE.DESTROY: {
+              repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.RESET);
+              repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER_ALL);
               if (events.cleanup) {
                 events.cleanup();
               }

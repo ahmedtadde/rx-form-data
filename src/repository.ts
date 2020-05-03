@@ -23,6 +23,8 @@ import {
 } from "@/constants";
 import { panic } from "@operators/error";
 import { isRegExp } from "@operators/string";
+import { isPlainObject } from "@operators/struct";
+import { isFormFieldElement } from "./operators/dom";
 
 export type FormFieldStorage = Map<string, FormField>;
 export type FormFieldSelectorExpression = string | RegExp;
@@ -132,21 +134,15 @@ export function initialize(
   }
 
   const $target = $formElement.value;
-  // const $elements = $target.elements;
-
-  // for (let idx = 0; idx < $elements.length; idx++) {
-  //   const $element = $elements[idx];
-  //   if (isFormFieldElement($element)) {
-  //     put(storage, fromElement($element));
-  //   }
-  // }
 
   const storageref = new Map<FormFieldStorage, FormFieldStorage>();
   storageref.set(storage, new Map<string, FormField>(storage.entries()));
 
   const getstorage = (): FormFieldStorage => {
     const latest = storageref.get(storage);
-    return latest ? latest : new Map<string, FormField>();
+    return latest
+      ? new Map<string, FormField>(latest.entries())
+      : new Map<string, FormField>();
   };
 
   const register = new Set<FormFieldSelectorExpression>();
@@ -156,7 +152,9 @@ export function initialize(
   );
   const getregister = (): FormFieldRegister => {
     const latest = registerref.get(register);
-    return latest ? latest : new Set<FormFieldSelectorExpression>();
+    return latest
+      ? new Set<FormFieldSelectorExpression>(latest.values())
+      : new Set<FormFieldSelectorExpression>();
   };
 
   const action = (
@@ -166,6 +164,7 @@ export function initialize(
       | FormField
       | Array<string | FormField>
       | FormFieldSelectorExpression[]
+      | { use: FormFieldSelectorExpression[]; keepvalues: boolean }
   ): void => {
     switch (type) {
       case FORM_FIELD_STORAGE_ACTION_TYPE.UPSERT: {
@@ -195,6 +194,28 @@ export function initialize(
         publish($target, getstorage());
         break;
       }
+
+      case FORM_FIELD_STORAGE_ACTION_TYPE.REGISTER_ALL: {
+        const expressions = Array.from($target.elements).reduce(
+          (expressions: FormFieldSelectorExpression[], $element) => {
+            return isFormFieldElement($element)
+              ? expressions.concat($element.name)
+              : expressions;
+          },
+          [] as FormFieldSelectorExpression[]
+        );
+        registerref.set(
+          register,
+          new Set<FormFieldSelectorExpression>(expressions)
+        );
+        break;
+      }
+
+      case FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER_ALL: {
+        registerref.set(register, new Set<FormFieldSelectorExpression>());
+        break;
+      }
+
       case FORM_FIELD_STORAGE_ACTION_TYPE.DELETE: {
         const params = Array.isArray(payload)
           ? (payload as Array<string | FormField>).filter(
@@ -212,7 +233,6 @@ export function initialize(
       }
       case FORM_FIELD_STORAGE_ACTION_TYPE.RESET: {
         storageref.set(storage, reset(getstorage(), storage));
-        // registerref.set(register, new Set<FormFieldSelectorExpression>());
         publish($target, getstorage());
         break;
       }
@@ -228,16 +248,31 @@ export function initialize(
         break;
       }
       case FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER: {
-        const params = Array.isArray(payload)
-          ? (payload as FormFieldSelectorExpression[]).filter(
-              (item: unknown) => isNonEmptyString(item) || isRegExp(item)
-            )
-          : [];
-        if (params.length) {
-          const result = exclude(getstorage(), getregister(), params);
-          registerref.set(register, result[0]);
-          storageref.set(storage, result[1]);
-          publish($target, getstorage());
+        if (payload && isPlainObject(payload)) {
+          const params = Array.isArray(payload.use)
+            ? (payload.use as FormFieldSelectorExpression[]).filter(
+                (item: unknown) => isNonEmptyString(item) || isRegExp(item)
+              )
+            : [];
+
+          if (params.length) {
+            const result = exclude(getstorage(), getregister(), params);
+            registerref.set(register, result[0]);
+            if (!payload.keepvalues) {
+              storageref.set(storage, result[1]);
+              publish($target, getstorage());
+            }
+          }
+        } else {
+          const params = Array.isArray(payload)
+            ? (payload as FormFieldSelectorExpression[]).filter(
+                (item: unknown) => isNonEmptyString(item) || isRegExp(item)
+              )
+            : [];
+          if (params.length) {
+            const result = exclude(getstorage(), getregister(), params);
+            registerref.set(register, result[0]);
+          }
         }
         break;
       }
