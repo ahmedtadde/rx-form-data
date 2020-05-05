@@ -13,7 +13,7 @@ import {
   HTMLFormFieldValue,
   HTMLFormFieldTag
 } from "@datatypes/base";
-import { isNonEmptyString } from "@operators/string";
+import { isNonEmptyString, isString } from "@operators/string";
 import { HTML_FORM_FIELD_TAG } from "@/constants";
 
 export function isFormElement(x: unknown): x is HTMLFormElement {
@@ -237,4 +237,18 @@ export function isFormFieldElementActive($target: unknown): boolean {
   }
 
   return false;
+}
+
+export function isFormFieldValue(x: unknown): x is HTMLFormFieldValue {
+  if (isString(x)) return true;
+  if (typeof x === "number") return true;
+  if (Array.isArray(x)) {
+    if (x.every(isString) || x.every((f: unknown) => f instanceof File))
+      return true;
+  }
+  return false;
+}
+
+export function isFormFieldInternalTag(x: unknown): x is HTMLFormFieldTag {
+  return isNonEmptyString(x) && Object.keys(HTML_FORM_FIELD_TAG).includes(x);
 }

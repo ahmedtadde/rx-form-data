@@ -16,11 +16,14 @@ import {
 import {
   $getfield,
   getFormFieldValue,
-  isFormFieldElement
+  isFormFieldElement,
+  isFormFieldValue,
+  isFormFieldInternalTag
 } from "@operators/dom";
 
 import { HTML_FORM_NATIVE_EVENT_TYPE, HTML_FORM_FIELD_TAG } from "@/constants";
 import { isPlainObject } from "@operators/struct";
+import { isNonEmptyString } from "@operators/string";
 
 export interface FormFieldStatus {
   readonly touched: boolean;
@@ -59,8 +62,75 @@ export const empty: FormField = Object.freeze({
 });
 
 export function isFormFieldStruct(x: unknown): x is FormField {
-  //TODO: missing refinement logic...
-  return isPlainObject(x);
+  if (!isPlainObject(x)) return false;
+  const requiredProps = Object.keys(empty);
+  const hasRequiredProps = Object.keys(x).every((key) =>
+    requiredProps.includes(key)
+  );
+  if (!hasRequiredProps) return false;
+
+  const isOptional = <T>(
+    something: unknown,
+    refinement: (value: unknown) => boolean
+  ): something is T => {
+    return (
+      isPlainObject(something) &&
+      isNonEmptyString(something._is) &&
+      ["none", "some"].includes(something._is) &&
+      (something._is === "some" ? refinement(something.value) : true)
+    );
+  };
+
+  return Object.entries(x).reduce(
+    (isvalid: boolean, [key, value]: [string, unknown]) => {
+      switch (key) {
+        case "$": {
+          return (
+            isvalid &&
+            isOptional<Option<HTMLFormFieldElement>>(value, isFormFieldElement)
+          );
+        }
+        case "tag": {
+          return (
+            isvalid &&
+            isOptional<Option<HTMLFormFieldTag>>(value, isFormFieldInternalTag)
+          );
+        }
+
+        case "name": {
+          return isvalid && isOptional<Option<string>>(value, isNonEmptyString);
+        }
+
+        case "value": {
+          return (
+            isvalid &&
+            isOptional<Option<HTMLFormFieldValue>>(value, isFormFieldValue)
+          );
+        }
+
+        case "validity": {
+          return (
+            isvalid &&
+            isOptional<Option<ValidityState>>(
+              value,
+              (u: unknown) => u instanceof ValidityState
+            )
+          );
+        }
+
+        case "touched":
+        case "visited":
+        case "modified": {
+          return typeof value === "boolean";
+        }
+
+        default: {
+          return false;
+        }
+      }
+    },
+    true
+  );
 }
 
 export function concat(x: FormField, y: FormField): FormField {
