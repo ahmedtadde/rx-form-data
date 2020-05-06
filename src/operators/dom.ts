@@ -11,9 +11,10 @@ import {
 import {
   HTMLFormFieldElement,
   HTMLFormFieldValue,
-  HTMLFormFieldTag
+  HTMLFormFieldTag,
+  FormFieldSelectorExpression
 } from "@datatypes/base";
-import { isNonEmptyString, isString } from "@operators/string";
+import { isNonEmptyString, isString, isRegExp } from "@operators/string";
 import { HTML_FORM_FIELD_TAG } from "@/constants";
 
 export function isFormElement(x: unknown): x is HTMLFormElement {
@@ -251,4 +252,13 @@ export function isFormFieldValue(x: unknown): x is HTMLFormFieldValue {
 
 export function isFormFieldInternalTag(x: unknown): x is HTMLFormFieldTag {
   return isNonEmptyString(x) && Object.keys(HTML_FORM_FIELD_TAG).includes(x);
+}
+
+export function isFormFieldSelectorExpression(
+  x: unknown
+): x is FormFieldSelectorExpression {
+  if (isString(x)) {
+    return isNonEmptyString(x.trim());
+  }
+  return isRegExp(x);
 }

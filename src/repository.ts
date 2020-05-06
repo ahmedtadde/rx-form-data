@@ -15,7 +15,8 @@ import { isNonEmptyString } from "@operators/string";
 // import { isFormFieldElement } from "@operators/dom";
 import {
   FormFieldStorageActionType,
-  FormFieldStorageInterface
+  FormFieldStorageInterface,
+  FormFieldSelectorExpression
 } from "@datatypes/base";
 import {
   FORM_FIELD_STORAGE_ACTION_TYPE,
@@ -24,11 +25,15 @@ import {
 import { panic } from "@operators/error";
 import { isRegExp } from "@operators/string";
 import { isPlainObject } from "@operators/struct";
-import { isFormFieldElement } from "./operators/dom";
+import {
+  isFormFieldElement,
+  isFormFieldSelectorExpression
+} from "./operators/dom";
+import { Decoder, isDecoder } from "@datatypes/Decoder";
 
 export type FormFieldStorage = Map<string, FormField>;
-export type FormFieldSelectorExpression = string | RegExp;
 export type FormFieldRegister = Set<FormFieldSelectorExpression>;
+export type FormDecoders = Map<string, Decoder>;
 
 export function put(
   storage: FormFieldStorage,
@@ -157,6 +162,19 @@ export function initialize(
       : new Set<FormFieldSelectorExpression>();
   };
 
+  const decoders = new Map<string, Decoder>();
+  const decodersref = new Map<FormDecoders, FormDecoders>().set(
+    decoders,
+    decoders
+  );
+
+  const getdecoders = (): FormDecoders => {
+    const latest = decodersref.get(decoders);
+    return latest
+      ? new Map<string, Decoder>(latest.entries())
+      : new Map<string, Decoder>();
+  };
+
   const action = (
     type: FormFieldStorageActionType,
     payload?:
@@ -165,6 +183,7 @@ export function initialize(
       | Array<string | FormField>
       | FormFieldSelectorExpression[]
       | { use: FormFieldSelectorExpression[]; keepvalues: boolean }
+      | Decoder[]
   ): void => {
     switch (type) {
       case FORM_FIELD_STORAGE_ACTION_TYPE.UPSERT: {
@@ -276,11 +295,48 @@ export function initialize(
         }
         break;
       }
+
+      case FORM_FIELD_STORAGE_ACTION_TYPE.UPSERT_DECODER: {
+        if (Array.isArray(payload) && payload.every(isDecoder)) {
+          const collection = getdecoders();
+          for (let idx = 0, length = payload.length; idx < length; idx++) {
+            const decoder = payload[idx] as Decoder;
+            collection.set(decoder.name, decoder);
+          }
+          decodersref.set(decoders, collection);
+        }
+        break;
+      }
+
+      case FORM_FIELD_STORAGE_ACTION_TYPE.REMOVE_DECODER: {
+        if (Array.isArray(payload)) {
+          const collection = getdecoders();
+          for (let idx = 0, length = payload.length; idx < length; idx++) {
+            const expression = payload[idx];
+            if (!isFormFieldSelectorExpression(expression)) continue;
+            for (const [key] of collection) {
+              if (isNonEmptyString(expression) && expression === key) {
+                collection.delete(key);
+              } else if (isRegExp(expression) && expression.test(key)) {
+                collection.delete(key);
+              }
+            }
+          }
+          decodersref.set(decoders, collection);
+        }
+        break;
+      }
+
+      case FORM_FIELD_STORAGE_ACTION_TYPE.CLEAR_DECODERS: {
+        decodersref.set(decoders, new Map<string, Decoder>());
+        break;
+      }
     }
   };
 
   return {
     storage: getstorage,
+    decoders: getdecoders,
     action
   } as const;
 }

@@ -7,23 +7,29 @@ import {
   PROGRAM_INTERFACE_ACTION_TYPE
 } from "@/constants";
 import { FormField, SerializedFormField } from "@datatypes/Field";
-import { FormFieldStorage, FormFieldSelectorExpression } from "@/repository";
+import { FormFieldStorage, FormDecoders } from "@/repository";
+import { DecoderResult, Decoder } from "@datatypes/Decoder";
 
 export type Predicate<T> = (x: T) => boolean;
 export type SubmissionHandlerConfigOption = <T, U = never>(
   formvalues: Readonly<Record<string, SerializedFormField<U>>>,
+  formvalidation: Error | Readonly<Record<string, Readonly<DecoderResult>>>,
   formdata: FormData
 ) => T;
 export type FormFieldStorageActionFn = (
   type: FormFieldStorageActionType,
   payload?:
+    | FormFieldSelectorExpression
     | FormField
     | Array<string | FormField>
     | FormFieldSelectorExpression[]
+    | { use: FormFieldSelectorExpression[]; keepvalues: boolean }
+    | Decoder[]
 ) => void;
 
 export type FormFieldStorageInterface = Readonly<{
   storage: () => FormFieldStorage;
+  decoders: () => FormDecoders;
   action: FormFieldStorageActionFn;
   cleanup?: () => void;
 }>;
@@ -40,7 +46,8 @@ export type FormEventsInterface = Readonly<{
 }>;
 
 export type FormFieldSubscriber = <T>(
-  formvalues: Readonly<Record<string, SerializedFormField<T>>>
+  formvalues: Readonly<Record<string, SerializedFormField<T>>>,
+  formvalidation: Error | Readonly<Record<string, Readonly<DecoderResult>>>
 ) => void;
 
 export type HTMLFormFieldElement =
@@ -53,6 +60,8 @@ export type HTMLFormFieldValue =
   | number
   | ReadonlyArray<string>
   | ReadonlyArray<File>;
+
+export type FormFieldSelectorExpression = string | RegExp;
 
 export type HTMLFormFieldTag = typeof HTML_FORM_FIELD_TAG[keyof typeof HTML_FORM_FIELD_TAG];
 export type HTMLFormNativeEventType = typeof HTML_FORM_NATIVE_EVENT_TYPE[keyof typeof HTML_FORM_NATIVE_EVENT_TYPE];

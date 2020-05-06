@@ -1,6 +1,6 @@
 {
   "name": "@metronlabs/rx-form-data",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Framework agnostic reactive form data streaming",
   "keywords": [
     "form",
@@ -15,7 +15,8 @@
   "module": "lib/index.es.js",
   "browser": "lib/index.umd.js",
   "files": [
-    "lib/*/**"
+    "lib/*/**",
+    "src"
   ],
   "types": "lib/types/index.d.ts",
   "author": "Ahmed Tadde <ahmedtadde@gmail.com> (http://github.com/ahmedtadde)",

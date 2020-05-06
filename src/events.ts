@@ -1,4 +1,4 @@
-import { FormFieldStorage } from "@/repository";
+import { FormFieldStorage, FormDecoders } from "@/repository";
 import {
   FormField,
   fromFormEvent,
@@ -23,11 +23,15 @@ import {
 } from "@/constants";
 import { panic } from "@operators/error";
 
+import { run as runDecoder, DecoderResult } from "@datatypes/Decoder";
+
 export async function onsubmit<T>(
   $form: HTMLFormElement,
   storage: FormFieldStorage,
+  decoders: FormDecoders,
   handler: <K extends T, U>(
     formvalues: Readonly<Record<string, SerializedFormField<U>>>,
+    formvalidation: Error | Readonly<Record<string, Readonly<DecoderResult>>>,
     formdata: FormData
   ) => K
 ): Promise<T> {
@@ -47,8 +51,31 @@ export async function onsubmit<T>(
           },
           {} as Record<string, SerializedFormField<typeof nilvalue>>
         );
+
+        return Promise.all([
+          nilvalue,
+          formvalues,
+          Promise.all(
+            Array.from(decoders.values()).map((decoder) =>
+              runDecoder(decoder, formvalues)
+            )
+          )
+        ]);
+      })
+      .then(([nil, formvalues, decoderResults]) => {
+        const validation = decoderResults.reduce(
+          (collection: Record<string, Readonly<DecoderResult>>, result) => {
+            return Object.assign(collection, Object.freeze(result));
+          },
+          {} as Record<string, Readonly<DecoderResult>>
+        );
+
         return Promise.resolve(
-          handler<T, typeof nilvalue>(Object.freeze(formvalues), formdata)
+          handler<T, typeof nil>(
+            Object.freeze(formvalues),
+            Object.freeze(validation),
+            formdata
+          )
         );
       })
       .then(() => {
@@ -99,9 +126,38 @@ export function getFormEventListener(
             {} as Record<string, SerializedFormField<typeof nilvalue>>
           );
 
-          for (const fn of subscribers) {
-            fn(formvalues);
-          }
+          Promise.all(
+            [...storageinterface.decoders().values()].map((decoder) =>
+              runDecoder(decoder, formvalues)
+            )
+          )
+            .then((decoderResults) => {
+              const validation = decoderResults.reduce(
+                (
+                  collection: Record<string, Readonly<DecoderResult>>,
+                  result
+                ) => {
+                  return Object.assign(collection, Object.freeze(result));
+                },
+                {} as Record<string, Readonly<DecoderResult>>
+              );
+
+              for (const fn of subscribers) {
+                fn(formvalues, Object.freeze(validation));
+              }
+            })
+            .catch((err) => {
+              const error = new Error(
+                "[RxFormData] An an error occured while running decoders. Check the error details for more info."
+              );
+              // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+              //@ts-ignore
+              error.details = err;
+
+              for (const fn of subscribers) {
+                fn(formvalues, error);
+              }
+            });
           break;
         }
       }
@@ -112,6 +168,7 @@ export function getFormEventListener(
           onsubmit<ReturnType<typeof submissionHanlder>>(
             $target,
             storageinterface.storage(),
+            storageinterface.decoders(),
             submissionHanlder
           );
           break;

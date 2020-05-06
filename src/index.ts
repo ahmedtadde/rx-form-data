@@ -1,16 +1,14 @@
-import { $getform } from "@operators/dom";
+import { $getform, isFormFieldSelectorExpression } from "@operators/dom";
 import { isNone } from "@datatypes/Option";
 import { panic } from "@operators/error";
-import {
-  initialize as repositoryInitialization,
-  FormFieldSelectorExpression
-} from "@/repository";
+import { initialize as repositoryInitialization } from "@/repository";
 import { initialize as eventsInitialization } from "@/events";
 import {
   SubmissionHandlerConfigOption,
   ProgramInterfaceActionFn,
   ProgramInterfaceActionType,
-  FormFieldSubscriber
+  FormFieldSubscriber,
+  FormFieldSelectorExpression
 } from "@datatypes/base";
 import {
   PROGRAM_INTERFACE_ACTION_TYPE,
@@ -18,6 +16,7 @@ import {
   FORM_FIELD_STORAGE_ACTION_TYPE
 } from "@/constants";
 import { isNonEmptyString, isRegExp } from "@operators/string";
+import { isDecoder } from "./datatypes/Decoder";
 
 export default function RxFormData(
   formid: string,
@@ -130,6 +129,32 @@ export default function RxFormData(
               }
               break;
             }
+
+            case PROGRAM_INTERFACE_ACTION_TYPE.ADD_DECODERS: {
+              if (Array.isArray(payload)) {
+                repository.action(
+                  FORM_FIELD_STORAGE_ACTION_TYPE.UPSERT_DECODER,
+                  payload.filter(isDecoder)
+                );
+              }
+              break;
+            }
+
+            case PROGRAM_INTERFACE_ACTION_TYPE.REMOVE_DECODERS: {
+              if (Array.isArray(payload)) {
+                repository.action(
+                  FORM_FIELD_STORAGE_ACTION_TYPE.REMOVE_DECODER,
+                  payload.filter(isFormFieldSelectorExpression)
+                );
+              }
+              break;
+            }
+
+            case PROGRAM_INTERFACE_ACTION_TYPE.CLEAR_DECODERS: {
+              repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.CLEAR_DECODERS);
+              break;
+            }
+
             default: {
               console.debug(
                 `[RxFormData: #${formid}] uknown action dispatched...`,
