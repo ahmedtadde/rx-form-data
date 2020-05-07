@@ -1,6 +1,6 @@
 {
   "name": "@metronlabs/rx-form-data",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Framework agnostic reactive form data streaming",
   "keywords": [
     "form",
@@ -32,10 +32,11 @@
     "start": "npm run serve",
     "serve": "rollup -c rollup.config.ts -w",
     "lint": "eslint --ext .js,.ts src/* --fix && prettier --write \"src/**/*.{js,ts}\"",
-    "clean": "rimraf lib/*",
+    "clean": "rimraf lib/*  && rimraf examples/dist/*",
     "prebuild": "npm run lint && npm run clean",
     "build": "rollup -c rollup.config.ts && ./node_modules/.bin/ttsc -p ./tsconfig.types.json",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "postbuild": "cp lib/index.umd.js examples/dist"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.1.0",

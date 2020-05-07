@@ -65,7 +65,7 @@ export async function onsubmit<T>(
       .then(([nil, formvalues, decoderResults]) => {
         const validation = decoderResults.reduce(
           (collection: Record<string, Readonly<DecoderResult>>, result) => {
-            return Object.assign(collection, Object.freeze(result));
+            return Object.assign({}, collection, Object.freeze(result));
           },
           {} as Record<string, Readonly<DecoderResult>>
         );
@@ -115,15 +115,17 @@ export function getFormEventListener(
         case HTML_FORM_CUSTOM_EVENT_TYPE.EMIT_FORM_VALUES: {
           const subscribers = subscribersinterface.subscribers();
           const nilvalue = null;
-          const formvalues = [...storageinterface.storage().entries()].reduce(
-            (
-              values: Record<string, SerializedFormField<typeof nilvalue>>,
-              [fieldname, fielddata]
-            ) => {
-              values[fieldname] = serialize(fielddata, nilvalue);
-              return values;
-            },
-            {} as Record<string, SerializedFormField<typeof nilvalue>>
+          const formvalues = Object.freeze(
+            [...storageinterface.storage().entries()].reduce(
+              (
+                values: Record<string, SerializedFormField<typeof nilvalue>>,
+                [fieldname, fielddata]
+              ) => {
+                values[fieldname] = serialize(fielddata, nilvalue);
+                return values;
+              },
+              {} as Record<string, SerializedFormField<typeof nilvalue>>
+            )
           );
 
           Promise.all(
@@ -137,7 +139,8 @@ export function getFormEventListener(
                   collection: Record<string, Readonly<DecoderResult>>,
                   result
                 ) => {
-                  return Object.assign(collection, Object.freeze(result));
+                  collection[result.decoder] = Object.freeze(result);
+                  return collection;
                 },
                 {} as Record<string, Readonly<DecoderResult>>
               );

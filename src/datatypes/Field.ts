@@ -55,7 +55,21 @@ export const empty: FormField = Object.freeze({
   tag: none as Option<HTMLFormFieldTag>,
   name: none as Option<string>,
   value: none as Option<HTMLFormFieldValue>,
-  validity: none as Option<Readonly<ValidityState>>,
+  validity: some(
+    Object.freeze({
+      badInput: false,
+      customError: false,
+      patternMismatch: false,
+      rangeOverflow: false,
+      rangeUnderflow: false,
+      stepMismatch: false,
+      tooLong: false,
+      tooShort: false,
+      typeMismatch: false,
+      valid: false,
+      valueMissing: false
+    })
+  ),
   touched: false,
   modified: false,
   visited: false
@@ -113,7 +127,8 @@ export function isFormFieldStruct(x: unknown): x is FormField {
             isvalid &&
             isOptional<Option<ValidityState>>(
               value,
-              (u: unknown) => u instanceof ValidityState
+              //TODO: make a proper predicate for the validity datatype
+              (u: unknown) => isPlainObject(u) || u instanceof ValidityState
             )
           );
         }
@@ -134,17 +149,12 @@ export function isFormFieldStruct(x: unknown): x is FormField {
 }
 
 export function concat(x: FormField, y: FormField): FormField {
-  const concatValidity = (
-    a: Readonly<ValidityState>,
-    b: Readonly<ValidityState>
-  ): Readonly<ValidityState> => ({ ...a, ...b });
-
   return Object.freeze({
     $: optionconcat(x.$, y.$),
     tag: optionconcat(x.tag, y.tag),
     name: optionconcat(x.name, y.name),
     value: optionconcat(x.value, y.value),
-    validity: optionconcat(x.validity, y.validity, concatValidity),
+    validity: optionconcat(x.validity, y.validity),
     touched: x.touched || y.touched,
     modified: x.modified || y.modified,
     visited: x.visited || y.visited

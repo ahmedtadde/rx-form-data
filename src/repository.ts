@@ -210,6 +210,7 @@ export function initialize(
       case FORM_FIELD_STORAGE_ACTION_TYPE.CLEAR: {
         storageref.set(storage, reset(getstorage()));
         registerref.set(register, new Set<FormFieldSelectorExpression>());
+        decodersref.set(decoders, new Map<string, Decoder>());
         publish($target, getstorage());
         break;
       }

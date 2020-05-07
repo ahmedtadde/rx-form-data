@@ -1,9 +1,8 @@
 import { FormFieldSelectorExpression } from "@datatypes/base";
 import { SerializedFormField } from "@datatypes/Field";
 import { isPlainObject } from "@/operators/struct";
-import { Option, none, some, isNone, isSome } from "@datatypes/Option";
-import { isNonEmptyString, isString, isRegExp } from "@/operators/string";
-import { isFormFieldSelectorExpression } from "@/operators/dom";
+import { Option, none, some, isSome } from "@datatypes/Option";
+import { isNonEmptyString, isRegExp } from "@/operators/string";
 
 export type DecoderResolver = <T, K>(
   inputs: Readonly<Record<string, SerializedFormField<T>>>
@@ -30,33 +29,36 @@ export function create(config: unknown): Option<Decoder> {
   if (!isPlainObject(config)) return none;
   if (!isNonEmptyString(config.name)) return none;
 
-  if (
-    !isFormFieldSelectorExpression(config.input) &&
-    !Array.isArray(config.input)
-  )
-    return none;
+  // if (
+  //   !isFormFieldSelectorExpression(config.input) &&
+  //   !Array.isArray(config.input)
+  // )
+  //   return none;
 
-  if (
-    Array.isArray(config.input) &&
-    !config.input.every(isFormFieldSelectorExpression)
-  )
-    return none;
+  // if (
+  //   Array.isArray(config.input) &&
+  //   !config.input.every(isFormFieldSelectorExpression)
+  // )
+  //   return none;
 
   if (!Array.isArray(config.use)) return none;
 
   if (!config.use.every((fn) => fn instanceof Function)) return none;
 
-  const hasMessage =
+  const hasValidationErrorMessagesConfig =
     (Array.isArray(config.messages) &&
       config.messages.every(isNonEmptyString)) ||
     config.messages instanceof Function;
 
-  if (!hasMessage) return none;
+  if (!hasValidationErrorMessagesConfig) return none;
 
   const name = config.name.trim();
-  const input = isFormFieldSelectorExpression(config.input)
-    ? ([config.input] as FormFieldSelectorExpression[])
-    : (config.input as FormFieldSelectorExpression[]);
+
+  // const input = isFormFieldSelectorExpression(config.input)
+  //   ? ([config.input] as FormFieldSelectorExpression[])
+  //   : (config.input as FormFieldSelectorExpression[]);
+
+  const input = [] as FormFieldSelectorExpression[];
 
   const use = config.use as DecoderResolver[];
 
@@ -103,20 +105,23 @@ export async function run<K>(
   formvalues: Readonly<Record<string, SerializedFormField<K>>>
 ): Promise<DecoderResult> {
   return new Promise((resolve) => {
-    Promise.resolve(getinputs<K>(decoder, formvalues))
-      .then((inputs) => {
-        return Promise.all([
-          inputs,
-          ...decoder.use.map((resolver) =>
-            resolver<K, ReturnType<typeof resolver>>(inputs)
+    // Promise.resolve(getinputs<K>(decoder, formvalues))
+    Promise.resolve()
+      .then(() => {
+        return Promise.all(
+          decoder.use.map((resolver) =>
+            resolver<K, ReturnType<typeof resolver>>(formvalues)
           )
-        ]);
+        );
       })
-      .then(([inputs, ...results]) => {
-        if (results.every((result) => result === true))
+      .then((results) => {
+        if (results.every((result) => result === true)) {
           return Promise.resolve([]);
+        }
 
-        return Promise.resolve(decoder.messages({ inputs, outputs: results }));
+        return Promise.resolve(
+          decoder.messages({ inputs: formvalues, outputs: results })
+        );
       })
       .then((errors) => {
         if (Array.isArray(errors)) {

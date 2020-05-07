@@ -1,5 +1,5 @@
 import { $getform, isFormFieldSelectorExpression } from "@operators/dom";
-import { isNone } from "@datatypes/Option";
+import { isNone, isSome } from "@datatypes/Option";
 import { panic } from "@operators/error";
 import { initialize as repositoryInitialization } from "@/repository";
 import { initialize as eventsInitialization } from "@/events";
@@ -16,7 +16,7 @@ import {
   FORM_FIELD_STORAGE_ACTION_TYPE
 } from "@/constants";
 import { isNonEmptyString, isRegExp } from "@operators/string";
-import { isDecoder } from "./datatypes/Decoder";
+import { create as createDecoder, Decoder } from "@datatypes/Decoder";
 
 export default function RxFormData(
   formid: string,
@@ -124,6 +124,7 @@ export default function RxFormData(
             case PROGRAM_INTERFACE_ACTION_TYPE.DESTROY: {
               repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.RESET);
               repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER_ALL);
+              repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.CLEAR_DECODERS);
               if (events.cleanup) {
                 events.cleanup();
               }
@@ -132,10 +133,19 @@ export default function RxFormData(
 
             case PROGRAM_INTERFACE_ACTION_TYPE.ADD_DECODERS: {
               if (Array.isArray(payload)) {
-                repository.action(
-                  FORM_FIELD_STORAGE_ACTION_TYPE.UPSERT_DECODER,
-                  payload.filter(isDecoder)
+                const params = payload.reduce(
+                  (decoders: Decoder[], config: unknown) => {
+                    const decoder = createDecoder(config);
+                    if (isSome(decoder)) return decoders.concat(decoder.value);
+                    return decoders;
+                  },
+                  [] as Decoder[]
                 );
+                if (params.length)
+                  repository.action(
+                    FORM_FIELD_STORAGE_ACTION_TYPE.UPSERT_DECODER,
+                    params
+                  );
               }
               break;
             }
