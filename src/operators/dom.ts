@@ -77,6 +77,17 @@ export function $getfield(
   }
 }
 
+export function localtimestamp(datestring: string, timeZone?: string): number {
+  return new Date(
+    new Date(datestring).toLocaleString(
+      Intl.DateTimeFormat().resolvedOptions().locale,
+      {
+        timeZone: isNonEmptyString(timeZone) ? timeZone.trim() : "UTC"
+      }
+    )
+  ).getTime();
+}
+
 export function getInputFieldValue(
   $target: unknown
 ): Option<HTMLFormFieldValue> {
@@ -90,6 +101,10 @@ export function getInputFieldValue(
     case HTML_FORM_FIELD_TAG.INPUT_SEARCH:
     case HTML_FORM_FIELD_TAG.INPUT_EMAIL:
     case HTML_FORM_FIELD_TAG.INPUT_COLOR:
+    case HTML_FORM_FIELD_TAG.INPUT_TIME:
+    case HTML_FORM_FIELD_TAG.INPUT_WEEK:
+    case HTML_FORM_FIELD_TAG.INPUT_DATE:
+    case HTML_FORM_FIELD_TAG.INPUT_MONTH:
     case HTML_FORM_FIELD_TAG.INPUT_HIDDEN: {
       return some($target.value.trim());
     }
@@ -98,7 +113,7 @@ export function getInputFieldValue(
     }
     case HTML_FORM_FIELD_TAG.INPUT_NUMBER:
     case HTML_FORM_FIELD_TAG.INPUT_RANGE: {
-      return fromNaN(Number($target.value.trim()));
+      return fromNaN($target.valueAsNumber);
     }
     case HTML_FORM_FIELD_TAG.INPUT_URL: {
       try {
@@ -109,11 +124,11 @@ export function getInputFieldValue(
           $target.value,
           error
         );
-        return none;
+        return some($target.value.trim());
       }
     }
     case HTML_FORM_FIELD_TAG.INPUT_TEL: {
-      return some($target.value.trim().replace(/\D/g, ""));
+      return some($target.value.trim());
     }
     case HTML_FORM_FIELD_TAG.INPUT_FILE: {
       return optionfold<
@@ -140,22 +155,9 @@ export function getInputFieldValue(
         }
       )(fromNullable($target.files));
     }
-    case HTML_FORM_FIELD_TAG.INPUT_DATE:
-    case HTML_FORM_FIELD_TAG.INPUT_DATETIME_LOCAL:
-    case HTML_FORM_FIELD_TAG.INPUT_TIME:
-    case HTML_FORM_FIELD_TAG.INPUT_WEEK: {
-      return fromNaN($target.valueAsNumber);
-    }
-    case HTML_FORM_FIELD_TAG.INPUT_MONTH: {
-      try {
-        return some(new Date(`${$target.value}-1`).getTime());
-      } catch (error) {
-        console.error(
-          "[RxFormData] Failed to decode month input field value into number",
-          error
-        );
-        return none;
-      }
+
+    case HTML_FORM_FIELD_TAG.INPUT_DATETIME_LOCAL: {
+      return fromNaN(new Date($target.value).getTime());
     }
     case HTML_FORM_FIELD_TAG.INPUT_RADIO:
     case HTML_FORM_FIELD_TAG.INPUT_CHECKBOX: {

@@ -1,12 +1,14 @@
 {
   "name": "@metronlabs/rx-form-data",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Framework agnostic reactive form data streaming",
   "keywords": [
     "form",
     "form data",
     "formdata",
+    "form handling",
     "reactive",
+    "rx",
     "frp",
     "reactive programming",
     "event-driven"

@@ -266,7 +266,40 @@ export function serialize<T>(field: FormField, nil: T): SerializedFormField<T> {
       (value: HTMLFormFieldValue) => value
     )(field.value);
 
-    if (data === nil) return data;
+    if (data === nil) {
+      switch (tag) {
+        case HTML_FORM_FIELD_TAG.INPUT_TEXT:
+        case HTML_FORM_FIELD_TAG.INPUT_SEARCH:
+        case HTML_FORM_FIELD_TAG.INPUT_EMAIL:
+        case HTML_FORM_FIELD_TAG.INPUT_COLOR:
+        case HTML_FORM_FIELD_TAG.INPUT_HIDDEN:
+        case HTML_FORM_FIELD_TAG.TEXTAREA:
+        case HTML_FORM_FIELD_TAG.INPUT_URL:
+        case HTML_FORM_FIELD_TAG.INPUT_TEL:
+        case HTML_FORM_FIELD_TAG.INPUT_PASSWORD:
+        case HTML_FORM_FIELD_TAG.INPUT_TIME:
+        case HTML_FORM_FIELD_TAG.INPUT_DATE:
+        case HTML_FORM_FIELD_TAG.INPUT_WEEK:
+        case HTML_FORM_FIELD_TAG.INPUT_MONTH: {
+          return "";
+        }
+        case HTML_FORM_FIELD_TAG.INPUT_NUMBER:
+        case HTML_FORM_FIELD_TAG.INPUT_RANGE:
+        case HTML_FORM_FIELD_TAG.INPUT_DATETIME_LOCAL: {
+          return Number.NaN;
+        }
+        case HTML_FORM_FIELD_TAG.INPUT_FILE:
+        case HTML_FORM_FIELD_TAG.INPUT_RADIO:
+        case HTML_FORM_FIELD_TAG.INPUT_CHECKBOX:
+        case HTML_FORM_FIELD_TAG.SELECT_SINGLE:
+        case HTML_FORM_FIELD_TAG.SELECT_MULTIPLE: {
+          return [];
+        }
+        default: {
+          return nil;
+        }
+      }
+    }
 
     switch (tag) {
       case HTML_FORM_FIELD_TAG.INPUT_TEXT:
@@ -277,16 +310,16 @@ export function serialize<T>(field: FormField, nil: T): SerializedFormField<T> {
       case HTML_FORM_FIELD_TAG.TEXTAREA:
       case HTML_FORM_FIELD_TAG.INPUT_URL:
       case HTML_FORM_FIELD_TAG.INPUT_TEL:
-      case HTML_FORM_FIELD_TAG.INPUT_PASSWORD: {
+      case HTML_FORM_FIELD_TAG.INPUT_PASSWORD:
+      case HTML_FORM_FIELD_TAG.INPUT_TIME:
+      case HTML_FORM_FIELD_TAG.INPUT_WEEK:
+      case HTML_FORM_FIELD_TAG.INPUT_MONTH:
+      case HTML_FORM_FIELD_TAG.INPUT_DATE: {
         return String(data);
       }
       case HTML_FORM_FIELD_TAG.INPUT_NUMBER:
       case HTML_FORM_FIELD_TAG.INPUT_RANGE:
-      case HTML_FORM_FIELD_TAG.INPUT_DATE:
-      case HTML_FORM_FIELD_TAG.INPUT_DATETIME_LOCAL:
-      case HTML_FORM_FIELD_TAG.INPUT_TIME:
-      case HTML_FORM_FIELD_TAG.INPUT_WEEK:
-      case HTML_FORM_FIELD_TAG.INPUT_MONTH: {
+      case HTML_FORM_FIELD_TAG.INPUT_DATETIME_LOCAL: {
         return Number(data);
       }
       case HTML_FORM_FIELD_TAG.INPUT_FILE: {

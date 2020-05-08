@@ -266,7 +266,10 @@ export function initialize(
     ...Object.values(HTML_FORM_NATIVE_EVENT_TYPE),
     ...Object.values(HTML_FORM_CUSTOM_EVENT_TYPE)
   ].forEach((eventtype) => {
-    $target.addEventListener(eventtype, listener, true);
+    const isInputEvent = HTML_FORM_NATIVE_EVENT_TYPE.INPUT === eventtype;
+    if (!isInputEvent) {
+      $target.addEventListener(eventtype, listener, true);
+    }
   });
 
   return {
