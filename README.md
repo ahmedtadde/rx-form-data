@@ -51,23 +51,65 @@ You can find the library on `window.RxFormData`.
 
 ```typescript
 import RxFormData from "@metronlabs/rx-form-data";
-const { subscribe, dispatch, ACTION_TYPE } = RxFormData(
+const { subscribe, register, dispatch, ACTION_TYPE } = RxFormData(
   "some-form-id",
-  (formvalues, formdata) => {
-    console.log("ON SUBMIT HANDLER CALLED", formvalues, formdata);
+  // form submission handler. This is required.
+  (formvalues, formvalidation, formdata) => {
+    // do some custom logic before XHR/AJAX calls... formdata is of HTML5 FormData object of the form element
+    console.log(
+      "ON SUBMIT HANDLER CALLED",
+      formvalues,
+      formvalidation,
+      formdata
+    );
     return Promise.resolve([formvalues]);
   }
 );
 
-const unsubscribe = subscribe((formvalues) => {
-  console.debug("FORM VALUES SUBSCRIBER", formvalues);
+//Registers all the input fields on the `some-form-id` form element
+dispatch(ACTION_TYPE.REGISTER_ALL);
+
+//Alternatively, you can  choose which fields to register
+//That can be done this way ...
+dispatch(ATION_TYPE.REGISTER, ["some-field-x", "some-field-y"]);
+// OR, this way
+const unregister = register(["some-field-x", "some-field-y"]);
+// ^ advantage of the later is that you get the 'unregister' function;
+
+//For validation, add some decoders.
+//A decoder has a name/label, a bunch of predicates with formvalues as input, and (static or computed) error messages
+dispatch(ACTION_TYPE.ADD_DECODERS, [
+  {
+    name: "validation-for-some-field-x",
+    use: [
+      (formvalues) => {
+        //...some logic
+        return true; // if returned value is not 'true' <=> validation failed!
+      }
+    ],
+    messages: ["Input is invalid"] // this can also be a function (context) => string | string[]
+  }
+]);
+
+const unsubscribe = subscribe((formvalues, formvalidation) => {
+  //formvalues includes data for all the currently registered fields
+  //formvalidation is derived from formvalues and the registered decoders...
+  console.debug("FORM DATA SUBSCRIBER", formvalues, formvalidation);
 });
 
+// You can have more than one subscriber (...just dont go crazy with it; all things in moderation and all)
+const unsubscribe2 = subscribe((formvalues, formvalidation) => {
+  console.debug("FORM DATA SUBSCRIBER II", formvalues, formvalidation);
+});
+
+// some time later... when y'er done
 setTimeout(() => {
   unsubscribe();
+  unsubscribe2();
 }, 2 * 60 * 1000);
 
 setTimeout(() => {
+  // clean up; unmounts all form element listners, clears registered fields & decoders...
   dispatch(ACTION_TYPE.DESTROY);
 }, 3 * 60 * 1000);
 ```

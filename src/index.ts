@@ -41,7 +41,7 @@ export default function RxFormData(
   if (repository && events) {
     return Object.freeze({
       ACTION_TYPE: Object.freeze(PROGRAM_INTERFACE_ACTION_TYPE),
-      register: Object.freeze(
+      X: Object.freeze(
         (selection: FormFieldSelectorExpression[]): (() => void) => {
           repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.REGISTER, selection);
           return Object.freeze((): void => {
