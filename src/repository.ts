@@ -324,6 +324,8 @@ export function initialize(
           if (params.length) {
             const result = exclude(getstorage(), getregister(), params);
             registerref.set(register, result[0]);
+            storageref.set(storage, result[1]);
+            publish($target, getstorage());
           }
         }
         break;

@@ -34,11 +34,11 @@
     "start": "npm run serve",
     "serve": "rollup -c rollup.config.ts -w",
     "lint": "eslint --ext .js,.ts src/* --fix && prettier --write \"src/**/*.{js,ts}\"",
-    "clean": "rimraf lib/*  && rimraf examples/dist/*",
+    "clean": "rimraf lib/*  && rimraf examples/dist/* && rimraf ./@types/**",
     "prebuild": "npm run lint && npm run clean",
     "build": "rollup -c rollup.config.ts && ./node_modules/.bin/ttsc -p ./tsconfig.types.json",
     "prepare": "npm run build",
-    "postbuild": "cp lib/index.umd.js examples/dist"
+    "postbuild": "cp lib/index.umd.js examples/dist && cp -r lib/types/ ./@types"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.1.0",

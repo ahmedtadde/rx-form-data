@@ -29,9 +29,7 @@
 npm install --save @metronlabs/rx-form-data
 ```
 
-Then with a module bundler like [rollup](http://rollupjs.org/) or [webpack](https://webpack.js.org/), use as you would anything else:
-
-```javascript
+```typescript
 // using ES6 modules
 import RxFormData from "@metronlabs/rx-form-data";
 
@@ -112,6 +110,89 @@ setTimeout(() => {
   // clean up: unmounts all form element listners, dettaches all subscribers, clears registered fields & decoders...
   dispatch(ACTION_TYPE.DESTROY);
 }, 3 * 60 * 1000);
+```
+
+## API
+
+Scan the type declarations (`@types` folder) for some insights on implementation details:
+
+- `RxFormData`
+  Main package function. Use this to create an RxFormData instance.
+
+```typescript
+const { subscribe, register, dispatch, ACTION_TYPE } = RxFormData(
+  "...",
+  // Form submission handler...
+  // Keep in mind, you are fully responsible for how to handle this event.
+  // All this library does is give you enough information to know what to do
+  // The formdata parameter is the FormData object of the form element at the moment a submission is triggered
+  (formvalues, formvalidation, formdata) => {...}
+);
+```
+
+- `subscribe`
+  Sets up subscriptions to form values and form validation updates. Takes a function as argument.
+
+```typescript
+ const unsubscribe = subscribe((formvalues, formvalidation) => {...});
+
+ //when subscription is no longer needed...
+ unsubscribe()
+
+```
+
+- `register`
+  Registers form field elements. Accepts a list of field names or regex expressions that are meant to match one or multiple field names.
+
+```typescript
+const unregister = register(["username", "email", /^password.*/]);
+
+//when you no longer care about the fields...
+unregister();
+//Or to keep these fields in the form values
+unregister(true);
+```
+
+- `dispatch` & `ACTION_TYPE`
+  Utilities to interface with the RxFormData instance
+
+```typescript
+//List of available actions
+{
+  REGISTER: "REGISTER_FIELDS",
+  REGISTER_ALL: "REGISTER_ALL_FIELDS",
+  UNREGISTER: "UNREGISTER_FIELDS",
+  UNREGISTER_ALL: "UNREGISTER_ALL_FIELDS",
+  ADD_DECODERS: "ADD_DECODERS",
+  REMOVE_DECODERS: "REMOVE_DECODERS",
+  CLEAR_DECODERS: "CLEAR_DECODERS",
+  DESTROY: "DESTROY_PROGRAM"
+};
+
+dispatch(ACTION_TYPE.REGISTER, payload: Array<string | RegExp>);
+
+dispatch(ACTION_TYPE.REGISTER_ALL); // registers all fields currently on the form elment
+
+dispatch(ACTION_TYPE.UNREGISTER, payload: Array<string | RegExp>); // keepvalues is set to false by default
+dispatch(ACTION_TYPE.UNREGISTER, payload: { use: payload: Array<string | RegExp>, keepvalues: boolean });
+
+dispatch(ACTION_TYPE.UNREGISTER_ALL, keepvalues?: boolean);
+
+dispatch(ACTION_TYPE.ADD_DECODERS, payload: {
+  /** this is used as key on the formvalidaiton object */
+  name: string;
+  /** predicate functions (i.e validators) */
+  use: Array<(formvalues: Readonly<Record<string, ...>>) => boolean>;
+  /** error messages for validation failure(s) */
+  messages: string[] | (context: Record<string, unknown>) => string | string[];
+});
+
+dispatch(ACTION_TYPE.REMOVE_DECODERS, payload: Array<string | RegExp>);
+
+
+dispatch(ACTION_TYPE.CLEAR_DECODERS); // clears all registered decoders
+
+dispatch(ACTION_TYPE.DESTROY); // basically renders RxFormData inert
 ```
 
 ## Contribute

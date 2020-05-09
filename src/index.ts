@@ -15,14 +15,17 @@ import {
   FORM_FIELDS_SUBSCRIBERS_ACTION_TYPE,
   FORM_FIELD_STORAGE_ACTION_TYPE
 } from "@/constants";
-import { isNonEmptyString, isRegExp } from "@operators/string";
 import { create as createDecoder, Decoder } from "@datatypes/Decoder";
+import { isPlainObject } from "./operators/struct";
 
 export default function RxFormData(
   formid: string,
   handler: SubmissionHandlerConfigOption
 ): Readonly<{
   ACTION_TYPE: Readonly<typeof PROGRAM_INTERFACE_ACTION_TYPE>;
+  register: (
+    selection: FormFieldSelectorExpression[]
+  ) => (keepvalues: boolean) => void;
   subscribe: Readonly<(subscriber: FormFieldSubscriber) => () => void>;
   dispatch: Readonly<ProgramInterfaceActionFn>;
 }> | void {
@@ -41,17 +44,17 @@ export default function RxFormData(
   if (repository && events) {
     return Object.freeze({
       ACTION_TYPE: Object.freeze(PROGRAM_INTERFACE_ACTION_TYPE),
-      X: Object.freeze(
-        (selection: FormFieldSelectorExpression[]): (() => void) => {
-          repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.REGISTER, selection);
-          return Object.freeze((): void => {
-            repository.action(
-              FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER,
-              selection
-            );
+      register: Object.freeze((selection: FormFieldSelectorExpression[]): ((
+        keepvalues: boolean
+      ) => void) => {
+        repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.REGISTER, selection);
+        return Object.freeze((keepvalues: boolean): void => {
+          repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER, {
+            use: selection,
+            keepvalues: keepvalues === true
           });
-        }
-      ),
+        });
+      }),
       subscribe: Object.freeze((subscriber: FormFieldSubscriber) => {
         events.action(FORM_FIELDS_SUBSCRIBERS_ACTION_TYPE.ADD, subscriber);
         return Object.freeze((): void => {
@@ -67,58 +70,44 @@ export default function RxFormData(
             }
 
             case PROGRAM_INTERFACE_ACTION_TYPE.REGISTER: {
-              const selection = Array.isArray(payload)
-                ? payload.reduce(
-                    (
-                      expressions: FormFieldSelectorExpression[],
-                      item: unknown
-                    ) => {
-                      if (isNonEmptyString(item) || isRegExp(item)) {
-                        return expressions.concat(item);
-                      }
-                      return expressions;
-                    },
-                    [] as FormFieldSelectorExpression[]
-                  )
-                : [];
-
-              selection.length &&
-                repository.action(
-                  FORM_FIELD_STORAGE_ACTION_TYPE.REGISTER,
-                  selection
-                );
+              if (Array.isArray(payload)) {
+                const selection = payload.filter(isFormFieldSelectorExpression);
+                selection.length &&
+                  repository.action(
+                    FORM_FIELD_STORAGE_ACTION_TYPE.REGISTER,
+                    selection
+                  );
+              }
               break;
             }
 
             case PROGRAM_INTERFACE_ACTION_TYPE.UNREGISTER_ALL: {
               repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER_ALL);
-              const keepvalues = payload !== false;
+              const keepvalues = payload === true;
               !keepvalues &&
                 repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.RESET);
               break;
             }
 
             case PROGRAM_INTERFACE_ACTION_TYPE.UNREGISTER: {
-              const selection = Array.isArray(payload)
-                ? payload.reduce(
-                    (
-                      expressions: FormFieldSelectorExpression[],
-                      item: unknown
-                    ) => {
-                      if (isNonEmptyString(item) || isRegExp(item)) {
-                        return expressions.concat(item);
-                      }
-                      return expressions;
-                    },
-                    [] as FormFieldSelectorExpression[]
-                  )
-                : [];
-
-              selection.length &&
-                repository.action(
-                  FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER,
-                  selection
-                );
+              if (Array.isArray(payload)) {
+                const selection = payload.filter(isFormFieldSelectorExpression);
+                selection.length &&
+                  repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER, {
+                    use: selection,
+                    keepvalues: false
+                  });
+              } else if (isPlainObject(payload)) {
+                const keepvalues = payload.keepvalues === true;
+                const selection = Array.isArray(payload.use)
+                  ? payload.use.filter(isFormFieldSelectorExpression)
+                  : [];
+                selection.length &&
+                  repository.action(FORM_FIELD_STORAGE_ACTION_TYPE.UNREGISTER, {
+                    use: selection,
+                    keepvalues
+                  });
+              }
               break;
             }
             case PROGRAM_INTERFACE_ACTION_TYPE.DESTROY: {
