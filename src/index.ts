@@ -166,7 +166,7 @@ export default function RxFormData(
             }
 
             default: {
-              console.debug(
+              console.info(
                 `[RxFormData: #${formid}] uknown action dispatched...`,
                 payload
               );

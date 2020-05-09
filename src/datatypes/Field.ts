@@ -18,7 +18,8 @@ import {
   getFormFieldValue,
   isFormFieldElement,
   isFormFieldValue,
-  isFormFieldInternalTag
+  isFormFieldInternalTag,
+  getFormFieldModifiedState
 } from "@operators/dom";
 
 import { HTML_FORM_NATIVE_EVENT_TYPE, HTML_FORM_FIELD_TAG } from "@/constants";
@@ -156,7 +157,7 @@ export function concat(x: FormField, y: FormField): FormField {
     value: optionconcat(x.value, y.value),
     validity: optionconcat(x.validity, y.validity),
     touched: x.touched || y.touched,
-    modified: x.modified || y.modified,
+    modified: y.modified,
     visited: x.visited || y.visited
   });
 }
@@ -210,9 +211,7 @@ export function fromFormEvent(evt: Event): FormField {
     HTML_FORM_NATIVE_EVENT_TYPE.BLUR
   ] as string[]).includes(evt.type);
 
-  const modified = ([HTML_FORM_NATIVE_EVENT_TYPE.CHANGE] as string[]).includes(
-    evt.type
-  );
+  const modified = touched && getFormFieldModifiedState($field);
 
   const visited = ([
     HTML_FORM_NATIVE_EVENT_TYPE.FOCUS,

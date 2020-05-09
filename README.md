@@ -55,7 +55,7 @@ const { subscribe, register, dispatch, ACTION_TYPE } = RxFormData(
   "some-form-id",
   // form submission handler. This is required.
   (formvalues, formvalidation, formdata) => {
-    // do some custom logic before XHR/AJAX calls... formdata is of HTML5 FormData object of the form element
+    // do some custom logic before XHR/AJAX calls... formdata is an HTML5 FormData object of the `some-form-id` form element
     console.log(
       "ON SUBMIT HANDLER CALLED",
       formvalues,
@@ -94,12 +94,12 @@ dispatch(ACTION_TYPE.ADD_DECODERS, [
 const unsubscribe = subscribe((formvalues, formvalidation) => {
   //formvalues includes data for all the currently registered fields
   //formvalidation is derived from formvalues and the registered decoders...
-  console.debug("FORM DATA SUBSCRIBER", formvalues, formvalidation);
+  console.info("FORM DATA SUBSCRIBER", formvalues, formvalidation);
 });
 
 // You can have more than one subscriber (...just dont go crazy with it; all things in moderation and all)
 const unsubscribe2 = subscribe((formvalues, formvalidation) => {
-  console.debug("FORM DATA SUBSCRIBER II", formvalues, formvalidation);
+  console.info("FORM DATA SUBSCRIBER II", formvalues, formvalidation);
 });
 
 // some time later... when y'er done
@@ -109,7 +109,7 @@ setTimeout(() => {
 }, 2 * 60 * 1000);
 
 setTimeout(() => {
-  // clean up; unmounts all form element listners, clears registered fields & decoders...
+  // clean up: unmounts all form element listners, dettaches all subscribers, clears registered fields & decoders...
   dispatch(ACTION_TYPE.DESTROY);
 }, 3 * 60 * 1000);
 ```

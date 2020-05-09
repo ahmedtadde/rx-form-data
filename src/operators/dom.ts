@@ -231,6 +231,78 @@ export function getFormFieldValue(
   return none;
 }
 
+export function getFormFieldModifiedState($target: unknown): boolean {
+  if (!isFormFieldElement($target)) return false;
+
+  if (isInputFieldElement($target) || isSelectFieldElement($target)) {
+    const $form = $target.form;
+    if (!$form) return false;
+    const fieldtag = `${$target.tagName.toLowerCase()}:${
+      $target.type
+    }` as HTMLFormFieldTag;
+
+    switch (fieldtag) {
+      case HTML_FORM_FIELD_TAG.INPUT_RADIO:
+      case HTML_FORM_FIELD_TAG.INPUT_CHECKBOX: {
+        const $options = $form.querySelectorAll(
+          `input[type='${$target.type}'][name='${$target.name}']`
+        );
+
+        const { defaultvalues, currentvalues } = Array.from($options).reduce(
+          (categorizedvalues: Record<string, string>, $node) => {
+            if (!isInputFieldElement($node)) return categorizedvalues;
+
+            if ($node.checked || $node.defaultChecked) {
+              categorizedvalues.defaultvalues = $node.defaultChecked
+                ? categorizedvalues.defaultvalues.concat(`${$node.value};`)
+                : categorizedvalues.defaultvalues;
+
+              categorizedvalues.currentvalues = $node.checked
+                ? categorizedvalues.currentvalues.concat(`${$node.value};`)
+                : categorizedvalues.currentvalues;
+              return categorizedvalues;
+            }
+
+            return categorizedvalues;
+          },
+          { defaultvalues: "", currentvalues: "" }
+        );
+        return defaultvalues !== currentvalues;
+      }
+      case HTML_FORM_FIELD_TAG.SELECT_SINGLE:
+      case HTML_FORM_FIELD_TAG.SELECT_MULTIPLE: {
+        const $options = $target.getElementsByTagName("option");
+        const { defaultvalues, currentvalues } = Array.from($options).reduce(
+          (categorizedvalues: Record<string, string>, $node) => {
+            if ($node.selected || $node.defaultSelected) {
+              categorizedvalues.defaultvalues = $node.defaultSelected
+                ? categorizedvalues.defaultvalues.concat(`${$node.value};`)
+                : categorizedvalues.defaultvalues;
+
+              categorizedvalues.currentvalues = $node.selected
+                ? categorizedvalues.currentvalues.concat(`${$node.value};`)
+                : categorizedvalues.currentvalues;
+              return categorizedvalues;
+            }
+
+            return categorizedvalues;
+          },
+          { defaultvalues: "", currentvalues: "" }
+        );
+        return defaultvalues !== currentvalues;
+      }
+      default: {
+        return isInputFieldElement($target)
+          ? $target.value !== $target.defaultValue
+          : false;
+      }
+    }
+  }
+
+  if (isTextareaFieldElement($target)) $target.value === $target.defaultValue;
+  return false;
+}
+
 export function isFormFieldElementActive($target: unknown): boolean {
   if (isFormFieldElement($target)) {
     const $active = fromNullable(document.activeElement);
