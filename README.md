@@ -178,14 +178,14 @@ dispatch(ACTION_TYPE.UNREGISTER, payload: { use: payload: Array<string | RegExp>
 
 dispatch(ACTION_TYPE.UNREGISTER_ALL, keepvalues?: boolean);
 
-dispatch(ACTION_TYPE.ADD_DECODERS, payload: {
+dispatch(ACTION_TYPE.ADD_DECODERS, payload: Array<{
   /** this is used as key on the formvalidaiton object */
   name: string;
   /** predicate functions (i.e validators) */
   use: Array<(formvalues: Readonly<Record<string, ...>>) => boolean>;
   /** error messages for validation failure(s) */
   messages: string[] | (context: Record<string, unknown>) => string | string[];
-});
+}>);
 
 dispatch(ACTION_TYPE.REMOVE_DECODERS, payload: Array<string | RegExp>);
 
