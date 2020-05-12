@@ -3,7 +3,8 @@ import {
   concat as formfieldconcat,
   isFormFieldStruct,
   fromDOMParams,
-  fromElement
+  fromElement,
+  updatestatus
 } from "@datatypes/Field";
 import {
   Option,
@@ -215,6 +216,22 @@ export function initialize(
         }
         break;
       }
+      case FORM_FIELD_STORAGE_ACTION_TYPE.UPDATE_BEFORE_SUBMISSION: {
+        const fields = getstorage();
+        for (const [fieldkey, fieldvalue] of fields) {
+          fields.set(
+            fieldkey,
+            updatestatus(fieldvalue, {
+              visited: true,
+              touched: true,
+              modified: fieldvalue.modified
+            })
+          );
+        }
+        storageref.set(storage, fields);
+        break;
+      }
+
       case FORM_FIELD_STORAGE_ACTION_TYPE.CLEAR: {
         storageref.set(storage, reset(getstorage()));
         registerref.set(register, new Set<FormFieldSelectorExpression>());

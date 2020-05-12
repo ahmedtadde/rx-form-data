@@ -168,6 +168,9 @@ export function getFormEventListener(
       switch (evt.type) {
         case HTML_FORM_NATIVE_EVENT_TYPE.SUBMIT: {
           evt.preventDefault();
+          storageinterface.action(
+            FORM_FIELD_STORAGE_ACTION_TYPE.UPDATE_BEFORE_SUBMISSION
+          );
           onsubmit<ReturnType<typeof submissionHanlder>>(
             $target,
             storageinterface.storage(),
