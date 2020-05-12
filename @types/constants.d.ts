@@ -37,6 +37,7 @@ export declare const FORM_FIELD_STORAGE_ACTION_TYPE: {
     readonly UPSERT: "UPSERT_FIELD";
     readonly DELETE: "DELETE_FIELD";
     readonly CLEAR: "CLEAR_FIELDS";
+    readonly UPDATE_BEFORE_SUBMISSION: "UPDATE_BEFORE_SUBMISSION";
     readonly RESET: "RESET";
     readonly UPSERT_DECODER: "UPSERT_DECODER";
     readonly REMOVE_DECODER: "REMOVE_DECODER";
