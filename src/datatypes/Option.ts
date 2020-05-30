@@ -30,7 +30,7 @@ export function fold<T, N, S>(
   none: () => N,
   some: (y: T) => S
 ): (x: Option<T>) => N | S {
-  return (x): N | S => (isNone(x) ? none() : some(x.value));
+  return (x: Option<T>): N | S => (isNone(x) ? none() : some(x.value));
 }
 
 export function concat<T>(
@@ -56,7 +56,7 @@ export function fromNullable<T>(x: T): Option<NonNullable<T>> {
 }
 
 export function fromPredicate<T>(fn: Predicate<T>): (x: T) => Option<T> {
-  return (x): Option<T> => (fn(x) ? some(x) : none);
+  return (x: T): Option<T> => (fn(x) ? some(x) : none);
 }
 
 export function fromNaN<T>(x: T): Option<number> {

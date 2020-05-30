@@ -153,7 +153,6 @@ export function getFormEventListener(
               const error = new Error(
                 "[RxFormData] An an error occured while running decoders. Check the error details for more info."
               );
-              // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
               //@ts-ignore
               error.details = err;
 

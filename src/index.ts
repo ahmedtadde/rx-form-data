@@ -41,7 +41,6 @@ export default function RxFormData(
     panic(
       "[RxFormData] Something really weird is happening. Repository initiliazition process failed."
     );
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     //@ts-ignore
     return;
   }
@@ -52,7 +51,7 @@ export default function RxFormData(
     panic(
       "[RxFormData] Something really weird is happening. Events initialization process failed"
     );
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+
     //@ts-ignore
     return;
   }

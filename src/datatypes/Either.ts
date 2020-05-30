@@ -22,5 +22,6 @@ export function fold<L, R, K, T>(
   onleft: (l: L) => K,
   onright: (r: R) => T
 ): (x: Either<L, R>) => K | T {
-  return (x): K | T => (x._is === "Left" ? onleft(x.value) : onright(x.value));
+  return (x: Either<L, R>): K | T =>
+    x._is === "Left" ? onleft(x.value) : onright(x.value);
 }
