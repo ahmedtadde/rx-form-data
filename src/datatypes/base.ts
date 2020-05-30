@@ -11,11 +11,11 @@ import { FormFieldStorage, FormDecoders } from "@/repository";
 import { DecoderResult, Decoder } from "@datatypes/Decoder";
 
 export type Predicate<T> = (x: T) => boolean;
-export type SubmissionHandlerConfigOption = <T, U = never>(
+export type SubmissionHandlerConfigOption = <U = never>(
   formvalues: Readonly<Record<string, SerializedFormField<U>>>,
   formvalidation: Error | Readonly<Record<string, Readonly<DecoderResult>>>,
   formdata: FormData
-) => T;
+) => unknown;
 export type FormFieldStorageActionFn = (
   type: FormFieldStorageActionType,
   payload?:

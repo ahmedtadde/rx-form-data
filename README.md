@@ -72,7 +72,7 @@ dispatch(ACTION_TYPE.REGISTER_ALL);
 dispatch(ATION_TYPE.REGISTER, ["some-field-x", "some-field-y"]);
 // OR, this way
 const unregister = register(["some-field-x", "some-field-y"]);
-// ^ advantage of the later is that you get the 'unregister' function;
+// ^ advantage of the latter is that you get the 'unregister' function;
 
 //For validation, add some decoders.
 //A decoder has a name/label, a bunch of predicates with formvalues as input, and (static or computed) error messages
@@ -131,7 +131,7 @@ const { subscribe, register, dispatch, ACTION_TYPE } = RxFormData(
 ```
 
 - `subscribe`
-  Sets up subscriptions to form values and form validation updates. Takes a function as argument.
+  Sets up subscriptions to form values and form validation updates. Takes a function as an argument.
 
 ```typescript
  const unsubscribe = subscribe((formvalues, formvalidation) => {...});

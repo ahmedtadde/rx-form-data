@@ -3,7 +3,7 @@ import { FormField, SerializedFormField } from "./Field";
 import { FormFieldStorage, FormDecoders } from "../repository";
 import { DecoderResult, Decoder } from "./Decoder";
 export declare type Predicate<T> = (x: T) => boolean;
-export declare type SubmissionHandlerConfigOption = <T, U = never>(formvalues: Readonly<Record<string, SerializedFormField<U>>>, formvalidation: Error | Readonly<Record<string, Readonly<DecoderResult>>>, formdata: FormData) => T;
+export declare type SubmissionHandlerConfigOption = <U = never>(formvalues: Readonly<Record<string, SerializedFormField<U>>>, formvalidation: Error | Readonly<Record<string, Readonly<DecoderResult>>>, formdata: FormData) => unknown;
 export declare type FormFieldStorageActionFn = (type: FormFieldStorageActionType, payload?: FormFieldSelectorExpression | FormField | Array<string | FormField> | FormFieldSelectorExpression[] | {
     use: FormFieldSelectorExpression[];
     keepvalues: boolean;

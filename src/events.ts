@@ -25,16 +25,16 @@ import { panic } from "@operators/error";
 
 import { run as runDecoder, DecoderResult } from "@datatypes/Decoder";
 
-export async function onsubmit<T>(
+export async function onsubmit(
   $form: HTMLFormElement,
   storage: FormFieldStorage,
   decoders: FormDecoders,
-  handler: <K extends T, U>(
+  handler: <U>(
     formvalues: Readonly<Record<string, SerializedFormField<U>>>,
     formvalidation: Error | Readonly<Record<string, Readonly<DecoderResult>>>,
     formdata: FormData
-  ) => K
-): Promise<T> {
+  ) => unknown
+): Promise<unknown> {
   const formdata = new FormData($form);
 
   return new Promise((resolve, reject) => {
@@ -71,7 +71,7 @@ export async function onsubmit<T>(
         );
 
         return Promise.resolve(
-          handler<T, typeof nil>(
+          handler<typeof nil>(
             Object.freeze(formvalues),
             Object.freeze(validation),
             formdata
@@ -171,7 +171,7 @@ export function getFormEventListener(
           storageinterface.action(
             FORM_FIELD_STORAGE_ACTION_TYPE.UPDATE_BEFORE_SUBMISSION
           );
-          onsubmit<ReturnType<typeof submissionHanlder>>(
+          onsubmit(
             $target,
             storageinterface.storage(),
             storageinterface.decoders(),
